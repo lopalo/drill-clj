@@ -1,0 +1,18 @@
+
+.auth {
+    margin-top: 10%;
+}
+
+.auth-form {
+    max-width: 400px;
+    padding-bottom: 2em;
+    text-align: center;
+    margin: auto;
+}
+
+.auth-form .field {
+    text-align: initial;
+}
+
+.tab {
+}
