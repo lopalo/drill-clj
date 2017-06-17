@@ -15,13 +15,17 @@
       body
       {:error error})))
 
-(defn api-get [url params]
-  (go (let [resp (<! (http/get (str URL "/" url) {:with-credentials? true
-                                                  :query-params params}))]
-
+(defn request [method url params-key params]
+  (go (let [resp (<! (method (str URL "/" url) {:with-credentials? true
+                                                params-key params}))]
         (response resp))))
 
-(defn api-post [url params]
-  (go (let [resp (<! (http/post (str URL "/" url) {:with-credentials? true
-                                                   :json-params params}))]
-        (response resp))))
+(defn api-get [url params] (request http/get url :query-params params))
+
+(defn api-post [url params] (request http/post url :json-params params))
+
+(defn api-patch [url params] (request http/patch url :json-params params))
+
+(defn api-delete [url params] (request http/delete url :query-params params))
+
+

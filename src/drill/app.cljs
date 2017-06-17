@@ -1,18 +1,20 @@
 (ns drill.app
-  (:require [rum.core :refer [defc defcc reactive react]]
+  (:require [rum.core :refer [defc defcc reactive react local]]
             [cljs-react-material-ui.rum :as ui]
             [cljs-react-material-ui.icons :as ic]
-            [drill.app-state :refer [user route set-route!]]
+            [drill.app-state :refer [*user *route set-route!]]
             [drill.utils :refer [log]]
+            [drill.common.mixins :refer [tab tabs-mx]]
             [drill.auth :refer [logout]]
             [drill.dictionary :refer [dictionary]]
-            [drill.my-dictionary :refer [my-dictionary]]))
+            [drill.my-dictionary :refer [my-dictionary]]
+            [drill.training :refer [training]]))
 
 (defcc right-button
   [react-comp]
   (ui/icon-menu {:style (-> react-comp .-props .-style)
                  :icon-button-element
-                 (ui/flat-button {:label (:name @user)
+                 (ui/flat-button {:label (:name @*user)
                                   :secondary true
                                   :icon (ic/action-account-circle)})}
                 (ui/menu-item {:primary-text "Settings"})
@@ -28,17 +30,14 @@
             "dictionary"})
 
 (defc app
-  < reactive
+  < reactive tabs-mx
   []
   [:div
    (ui/app-bar {:title "Drill"
                 :show-menu-icon-button false
                 :icon-element-right (right-button)})
-   (ui/tabs {:value (-> route react first tabs (or "my-dictionary"))
+   (ui/tabs {:value (-> *route react first tabs (or "my-dictionary"))
              :on-change set-route!}
-            (ui/tab {:label "training" :value "training"}
-                    (ui/card (ui/card-title {:title "Training"})))
-            (ui/tab {:label "my dictionary" :value "my-dictionary"}
-                    (ui/card (my-dictionary)))
-            (ui/tab {:label "dictionary" :value "dictionary"}
-                    (dictionary)))])
+            (tab "training" "training" training)
+            (tab "my-dictionary" "my dictionary" my-dictionary)
+            (tab "dictionary" "dictionary" dictionary))])

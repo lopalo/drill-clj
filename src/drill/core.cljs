@@ -4,7 +4,7 @@
             [cljs-react-material-ui.rum :as ui]
             [cljs-react-material-ui.icons :as ic]
             [rum.core :as rum :refer [defc reactive react]]
-            [drill.app-state :refer [user setup-router!]]
+            [drill.app-state :refer [*user setup-router!]]
             [drill.app :refer [app]]
             [drill.auth :refer [auth]]))
 
@@ -16,7 +16,7 @@
   []
   (ui/mui-theme-provider
    {:mui-them (get-mui-theme)}
-   (if (react user) (app) (auth))))
+   (if (react *user) (app) (auth))))
 
 (defn mount []
   (rum/mount (root-component)
