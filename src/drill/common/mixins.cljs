@@ -1,5 +1,5 @@
 (ns drill.common.mixins
-  (:require [clojure.core.async :refer [chan put! close!]]
+  (:require [clojure.core.async :refer [chan mult tap put! close!]]
             [rum.core :refer [local]]
             [cljs-react-material-ui.rum :as ui]
             [drill.utils :refer [log]])
@@ -24,15 +24,12 @@
               (render-fn state))))]
     (assoc (local initial loading) :wrap-render wrap-render)))
 
-
 (defn wrap-load [load-fn]
   (fn [state]
     (go (reset! (loading state) true)
         (<! (load-fn state))
         (reset! (loading state) false))
     state))
-
-
 
 (def ^:private ^:dynamic *tab-channels*)
 
@@ -53,17 +50,31 @@
        (binding [*tab-channels* (::tab-channels state)]
          (render-fn state))))})
 
+(def cleanup-mx
+  {:init
+   (fn [state]
+     (let [ch (chan 1)
+           mult (mult ch)]
+       (-> state
+           (assoc ::cleanup-channel ch)
+           (assoc ::cleanup-mult mult))))
+   :will-unmount
+   (fn [state]
+     (close! (::cleanup-channel state))
+     state)})
+
+(defn cleanup-chan [state]
+  (let [ch (chan 1)]
+    (tap (::cleanup-mult state) ch)
+    ch))
 
 (defn tab-mx [load!]
   {:did-mount
    (fn [{[on-active] :rum/args :as state}]
-     (go-loop [ok (<! on-active)]
-       (when ok
-         (load! state)
-         (recur (<! on-active))))
+     (let [cleanup (cleanup-chan state)]
+       (go-loop [[ok] (alts! [on-active cleanup])]
+         (when ok
+           (load! state)
+           (recur (alts! [on-active cleanup])))))
      (load! state)
-     state)
-   :will-unmount
-   (fn [{[on-active] :rum/args :as state}]
-     (put! on-active false)
      state)})

@@ -16,3 +16,18 @@
 
 .tab {
 }
+
+.training {
+    text-align: center;
+}
+
+.phrase-card {
+    padding: 1em;
+    max-width: 800px;
+    margin: auto;
+}
+
+.phrase-card .card-text {
+    margin-bottom: 1em;
+    font-size: 20px;
+}

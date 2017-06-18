@@ -10,11 +10,13 @@
             [cljs-react-material-ui.rum :as ui]
             [cljs-react-material-ui.icons :as ic]
             [drill.common.processes :refer [api-get api-post]]
-            [drill.common.mixins :refer [wrap-load loader-mx tab-mx]])
+            [drill.common.mixins :refer [wrap-load
+                                         loader-mx
+                                         tab-mx
+                                         cleanup-mx]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-
-(declare phrase-card)
+(declare phrase-card flip-button)
 
 (defn rotate [queue] (-> queue pop (conj (peek queue))))
 
@@ -40,34 +42,50 @@
           (swap! *queue into new-ids)
           (swap! *working-set merge new-set)))))
 
+(def initial-ui {:flipped false})
 
 (defcs training < (loader-mx)
+                  cleanup-mx
                   (local #queue [] ::ring-queue)
                   (local {} ::working-set)
+                  (local initial-ui ::ui)
                   (tab-mx load!)
   [state]
   (let [*queue (::ring-queue state)
         *working-set (::working-set state)
+        *ui (::ui state)
         pid (first @*queue)
         *phrase (cursor-in *working-set [pid])
-        pass! #(swap! *queue rotate)
-        complete! #(complete-phrase! state)]
-    (ui/card
+        reset-ui! #(reset! *ui initial-ui)
+        pass! #(do (swap! *queue rotate)
+                   (reset-ui!))
+        complete! #(do (complete-phrase! state)
+                       (reset-ui!))]
+    [:.training
+     (ui/card
       (ui/card-text
-        (phrase-card *phrase pass! complete!))
+       (phrase-card *phrase *ui))
       (ui/card-actions
-        (ui/raised-button {:label "Pass"
-                           :on-touch-tap pass!})
-        (ui/raised-button {:label "Complete"
-                           :on-touch-tap complete!})))))
+       (ui/raised-button {:label "Pass"
+                          :on-touch-tap pass!})
+       (ui/raised-button {:label "Complete"
+                          :on-touch-tap complete!})))]))
+
+(defc flip-button [*flipped]
+  [:.flip-button
+   (ui/floating-action-button
+    {:on-touch-tap #(swap! *flipped not)}
+    (ic/action-autorenew))])
+
+(defc card-text [text]
+  [:.card-text text])
 
 (defcs phrase-card < reactive
-                     (local {} ::flipped)
-  [state phrase]
-  (let [p (react phrase)
-        *flipped (::flipped state)
-        text ((if @*flipped :targetText :sourceText) p)
-        flip-btn (ui/floating-action-button
-                  {:on-touch-tap #(swap! *flipped not)}
-                  (ic/av-replay))]
-    (ui/paper {:z-depth 5} text flip-btn)))
+  [state *phrase *ui]
+  (let [p (react *phrase)
+        *flipped (cursor-in *ui [:flipped])
+        text ((if @*flipped :targetText :sourceText) p)]
+    (ui/paper {:z-depth 5
+               :class-name "phrase-card"}
+              (card-text text)
+              (flip-button *flipped))))

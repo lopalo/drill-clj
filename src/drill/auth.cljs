@@ -82,7 +82,5 @@
                          :disabled (not (f/can-submit? *form))
                          :on-touch-tap try-submit!})))))
 
-
-
 ;TODO: expandable card for register
 (defc register [] [:div])
