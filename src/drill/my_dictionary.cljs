@@ -41,9 +41,17 @@
   [state]
   (table (::rows state)))
 
+(defn text-header-col [text]
+  (ui/table-header-column {:style {:white-space "normal" :width "32%"}} text))
 
-(defn text-col [text]
-  (ui/table-row-column {:style {:white-space "normal"}} text))
+(defn text-row-col [text]
+  (ui/table-row-column {:style {:white-space "normal" :width "32%"}} text))
+
+(defn btn-header-col [text]
+  (ui/table-header-column {:style {:white-space "normal" :width "10%"}} text))
+
+(defn btn-row-col [btn]
+  (ui/table-row-column {:style {:white-space "normal" :width "10%"}} btn))
 
 (defc table [*rows]
   (ui/table
@@ -52,27 +60,29 @@
     {:display-select-all false
      :adjust-for-checkbox false}
     (ui/table-row
-     (ui/table-header-column "Source Text")
-     (ui/table-header-column "Target Text")
-     (ui/table-header-column "Reset")
+     (text-header-col "Source Text")
+     (text-header-col "Target Text")
+     (btn-header-col "Reset")
      (ui/table-header-column "Completion Time")
-     (ui/table-header-column "Delete")))
+     (btn-header-col "Delete")))
    (ui/table-body
     {:display-row-checkbox false}
     (for [[idx r] (map-indexed vector @*rows)
           :let [compl-time (:completionTime r)]]
       (ui/table-row
        {:key (:id r)}
-       (text-col (:sourceText r))
-       (text-col (:targetText r))
-       (ui/table-row-column
+       (text-row-col (:sourceText r))
+       (text-row-col (:targetText r))
+       (btn-row-col
         (ui/floating-action-button
          {:mini true
           :disabled (not compl-time)
           :on-touch-tap #(do-action! *rows idx :reset)}
          (ic/av-replay)))
-       (ui/table-row-column compl-time)
-       (ui/table-row-column
+       (ui/table-row-column {:style {:text-overflow "initial"
+                                     :white-space "normal"}}
+                            compl-time)
+       (btn-row-col
         (ui/floating-action-button
          {:mini true
           :secondary true

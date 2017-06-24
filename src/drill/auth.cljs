@@ -4,10 +4,10 @@
             [rum.core :refer [defc defcs local react reactive]]
             [cljs-react-material-ui.core :refer [color]]
             [cljs-react-material-ui.rum :as ui]
-            [drill.form :as f]
-            [drill.validators :as v]
             [drill.utils :refer [log]]
             [drill.app-state :refer [*user]]
+            [drill.common.form :as f]
+            [drill.common.validators :as v]
             [drill.common.processes :refer [api-get api-post]]
             [drill.common.mixins :refer [wrap-load loader-mx]])
   (:require-macros [cljs.core.async.macros :refer [go]]))

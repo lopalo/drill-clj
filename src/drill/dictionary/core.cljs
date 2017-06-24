@@ -1,4 +1,4 @@
-(ns drill.dictionary
+(ns drill.dictionary.core
   (:require [clojure.core.async :refer [<!]]
             [rum.core :as rum :refer [defc defcs local reactive react]]
             [cljs-react-material-ui.rum :as ui]
@@ -37,6 +37,14 @@
 
 (def load! (wrap-load fetch-table-data!))
 
+(defc load-more-btn [*table-data load-more!]
+  [:.load-more
+   (ui/raised-button
+    {:label "Load More"
+     :disabled (= (count (:list @*table-data)) (:total @*table-data))
+     :on-touch-tap load-more!})])
+
+
 ;;TODO: listen to filters' changes and handle them
 (defcs dictionary < (loader-mx)
                     cleanup-mx
@@ -44,18 +52,20 @@
                     (local initial-filters ::filters)
                     (tab-mx load!)
   [state]
-  (let [*table-data (::table-data state)]
+  (let [*table-data (::table-data state)
+        load-more! #(fetch-table-data! state true)]
     (ui/card (filters (::filters state))
              (table *table-data)
-             (ui/raised-button ;TODO: center
-              {:label "Load More"
-               :disabled (= (count (:list @*table-data)) (:total @*table-data))
-               :on-touch-tap #(fetch-table-data! state true)}))))
+             (load-more-btn *table-data load-more!))))
 
 (defc filters [filters] [:div])
 
-(defn text-col [text]
-  (ui/table-row-column {:style {:white-space "normal"}} text))
+
+(defn text-header-col [text]
+  (ui/table-header-column {:style {:white-space "normal" :width "35%"}} text))
+
+(defn text-row-col [text]
+  (ui/table-row-column {:style {:white-space "normal" :width "35%"}} text))
 
 (defc table [*table-data]
   (ui/table
@@ -64,8 +74,8 @@
     {:display-select-all false
      :adjust-for-checkbox false}
     (ui/table-row
-     (ui/table-header-column "Source Text")
-     (ui/table-header-column "Target Text")
+     (text-header-col "Source Text")
+     (text-header-col "Target Text")
      (ui/table-header-column "Added By")
      (ui/table-header-column "In My Dictionary")))
    (ui/table-body
@@ -73,8 +83,8 @@
     (for [[idx r] (->> @*table-data :list (map-indexed vector))]
       (ui/table-row
        {:key (:id r)}
-       (text-col (:sourceText r))
-       (text-col (:targetText r))
+       (text-row-col (:sourceText r))
+       (text-row-col (:targetText r))
        (ui/table-row-column (:addedBy r))
        (ui/table-row-column
         (ui/toggle {:toggled (:isInMyDict r)

@@ -1,4 +1,4 @@
-(ns drill.validators
+(ns drill.common.validators
   (:require [clojure.string :as s]))
 
 (defn not-blank [field values]

@@ -6,9 +6,9 @@
             [drill.utils :refer [log]]
             [drill.common.mixins :refer [tab tabs-mx]]
             [drill.auth :refer [logout]]
-            [drill.dictionary :refer [dictionary]]
+            [drill.dictionary.core :refer [dictionary]]
             [drill.my-dictionary :refer [my-dictionary]]
-            [drill.training :refer [training]]))
+            [drill.training.core :refer [training]]))
 
 (defcc right-button
   [react-comp]
