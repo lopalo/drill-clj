@@ -29,6 +29,7 @@
 .training .type-selector {
     position: absolute !important;
     left: 16px;
+    width: 9em !important;
     bottom: 0px;
     text-align: initial;
 }

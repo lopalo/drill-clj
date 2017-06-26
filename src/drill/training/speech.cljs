@@ -6,14 +6,16 @@
 
 (declare cancel!)
 
-(def synth (.-speechSynthesis js/window))
+(set! *warn-on-infer* true)
+
+(def synth js/speechSynthesis)
 
 (defn get-voice [lang]
-  (let [voices (.getVoices synth)
+  (let [^js/Array voices (.getVoices synth)
         voice-name (case lang
                      "ru" "Google русский"
                      "Google UK English Male")]
-    (.find voices #(= (.-name %) voice-name))))
+    (.find voices #(= (.-name ^js/SpeechSynthesisVoice %) voice-name))))
 
 (defn activate! [*ref text]
   (go (cancel! *ref)

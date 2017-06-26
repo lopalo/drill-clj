@@ -1,6 +1,5 @@
 (ns drill.training.phrase-constructor
   (:require [clojure.string :as s]
-            [clojure.set :refer [difference]]
             [rum.core :as rum :refer [defc
                                       defcs
                                       reactive
@@ -23,8 +22,8 @@
         clr #(if (= %1 %2) ok-color err-color)]
     [:.blocks
      (when (seq butlast*)
-       (for [[target-word word] butlast*]
-         (ui/chip {:key word
+       (for [[idx [target-word word]] (map-indexed vector butlast*)]
+         (ui/chip {:key (str idx word)
                    :background-color (clr target-word word)}
                   word)))
      (when last*
@@ -33,12 +32,20 @@
                    :background-color (clr target-word word)}
                   word)))]))
 
+(defn count-words [words]
+  (reduce-kv #(assoc %1 %2 (count %3)) {} (group-by identity words)))
+
 (defc blocks [target-words construct add-word!]
-  ;TODO: fix the case when the same word appears multiple times
-  (let [words (difference (set target-words) (set construct))]
+  (let [word-count (merge-with -
+                               (count-words target-words)
+                               (count-words construct))
+        words (for [[word cnt] word-count
+                    _ (range cnt)]
+                word)
+        words (sort-by (comp s/join reverse) words)]
     [:.blocks
-     (for [word (sort-by (comp s/join reverse) words)]
-       (ui/chip {:key word
+     (for [[idx word] (map-indexed vector words)]
+       (ui/chip {:key (str idx word)
                  :on-touch-tap (partial add-word! word)}
                 word))]))
 

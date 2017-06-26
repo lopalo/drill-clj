@@ -95,7 +95,7 @@
                          :value tp
                          :on-change #(swap! *ui assoc :type (keyword %3))}
                         (ui/menu-item {:value :flashcard
-                                       :primary-text "Card"})
+                                       :primary-text "Flashcard"})
                         (ui/menu-item {:value :constructor
                                        :primary-text "Constructor"}))
        (ui/raised-button {:label "Pass"

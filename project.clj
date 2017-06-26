@@ -50,6 +50,8 @@
                 :compiler {:output-to "resources/public/js/compiled/drill.js"
                            :main drill.core
                            :optimizations :advanced
+                           :infer-externs true
+                           :parallel-build true
                            :pretty-print false}}]}
 
   :figwheel {;; :http-server-root "public" ;; default and assumes "resources"
