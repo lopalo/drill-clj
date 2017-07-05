@@ -4,7 +4,8 @@
             [cljs-http.client :as http])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def URL "http://vladio")
+(def URL (let [host (. js/location -hostname)]
+           (str "http://" (if (= host "localhost") "vladio" host))))
 
 (defn- response [r]
   (let [status (:status r)

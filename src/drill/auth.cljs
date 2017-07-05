@@ -1,6 +1,6 @@
 (ns drill.auth
   (:require [clojure.set :refer [rename-keys]]
-            [clojure.core.async :refer [<!]]
+            [clojure.core.async :refer [<! timeout]]
             [rum.core :refer [defc defcs local react reactive]]
             [cljs-react-material-ui.core :refer [color]]
             [cljs-react-material-ui.rum :as ui]
@@ -10,7 +10,7 @@
             [drill.common.validators :as v]
             [drill.common.processes :refer [api-get api-post]]
             [drill.common.mixins :refer [wrap-load loader-mx]])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 (declare auth-forms login register)
 
@@ -21,6 +21,13 @@
   (go (let [data (<! (api-get "auth/user" {}))]
         (when (-> data :error nil?)
           (set-user! data)))))
+
+(defn check-session! []
+  (go-loop []
+    (<! (timeout 1000))
+    (when (and @*user (not (.includes js/document.cookie "session_id")))
+      (.reload js/location))
+    (recur)))
 
 (def auth-mx {:did-mount (wrap-load fetch-user!)})
 
@@ -82,5 +89,4 @@
                          :disabled (not (f/can-submit? *form))
                          :on-touch-tap try-submit!})))))
 
-;TODO: expandable card for register
 (defc register [] [:div])

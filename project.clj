@@ -12,7 +12,8 @@
                   :exclusions [org.clojure/tools.reader]]
                  [rum "0.10.8" :exclusions [cljsjs/react cljsjs/react-dom]]
                  [cljs-react-material-ui "0.2.44"]
-                 [cljs-http "0.1.43"]]
+                 [cljs-http "0.1.43"]
+                 [camel-snake-kebab "0.4.0"]]
 
   :plugins [[lein-figwheel "0.5.10"]
             [lein-cljsbuild "1.1.6" :exclusions [[org.clojure/clojure]]]]

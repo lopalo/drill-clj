@@ -8,7 +8,6 @@
             [cljs-react-material-ui.rum :as ui]
             [cljs-react-material-ui.icons :as ic]))
 
-
 (defc flip-button [*flipped]
   [:.flip-button
    (ui/floating-action-button

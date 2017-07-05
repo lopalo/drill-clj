@@ -14,7 +14,6 @@
                     :status :initial})
 
 (def statuses #{:initial :pending :submitted :submit-failure})
-
 (defn create-form [fields-spec]
   (let [collect #(into {} (map (juxt :name %) fields-spec))
         initial-values (collect :initial-value)
@@ -74,7 +73,14 @@
   (get-in @*form [:values field-name]))
 
 (defn field-atom [*form field-name]
-  (cursor-in *form [:values field-name]))
+  (let [*field (cursor-in *form [:values field-name])
+        ->initial!
+        (fn [old-v new-v]
+          (if (and (not= old-v new-v)
+                   (status? *form :submitted))
+            (set-status! *form :initial)))]
+    (add-watch *field ::->initial #(->initial! %3 %4))
+    *field))
 
 (defn field [*form field-name component]
   (component (field-atom *form field-name)

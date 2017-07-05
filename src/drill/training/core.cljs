@@ -4,15 +4,18 @@
             [rum.core :as rum :refer [defc
                                       defcs
                                       local
+                                      reactive
                                       react
                                       cursor-in]]
             [cljs-react-material-ui.rum :as ui]
             [cljs-react-material-ui.icons :as ic]
+            [cljs-react-material-ui.core :refer [color]]
             [drill.common.processes :refer [api-get api-post]]
             [drill.common.mixins :refer [wrap-load
                                          loader-mx
                                          tab-mx
                                          cleanup-mx]]
+            [drill.app-state :refer [*profile set-profile-field!]]
             [drill.training.flashcard :refer [flashcard]]
             [drill.training.phrase-constructor :refer [phrase-constructor]]
             [drill.training.speech
@@ -20,7 +23,6 @@
              :rename {activate! activate-speech!
                       cancel! cancel-speech!}])
   (:require-macros [cljs.core.async.macros :refer [go]]))
-
 
 (defn rotate [queue] (-> queue pop (conj (peek queue))))
 
@@ -48,13 +50,13 @@
 
 (def types #{:flashcard :constructor})
 
-(def initial-ui {:type :constructor
-                 :speech-active? false
+(def initial-ui {:speech-active? false
                  :flashcard {:flipped false}
                  :constructor {:can-complete? false
                                :construct []}})
 
 (defcs training < (loader-mx)
+                  reactive
                   cleanup-mx
                   (local #queue [] ::ring-queue)
                   (local {} ::working-set)
@@ -67,7 +69,7 @@
         *constructor (cursor-in *ui [:constructor])
         pid (first @*queue)
         *phrase (cursor-in *working-set [pid])
-        tp (:type @*ui)
+        tp (-> *profile react :trainingType keyword types (or :flashcard))
         can-complete? (or (= tp :flashcard) (:can-complete? @*constructor))
         *speech-active? (cursor-in *ui [:speech-active?])
         speech-active? @*speech-active?
@@ -82,18 +84,21 @@
     [:.training
      (ui/card
       (ui/card-text
-       (case tp
-         :flashcard (flashcard *phrase
-                               (cursor-in *ui [:flashcard])
-                               activate-speech!)
-         :constructor (phrase-constructor *phrase
-                                          *constructor
-                                          activate-speech!)))
+       (if @*phrase
+         (case tp
+           :flashcard (flashcard *phrase
+                                 (cursor-in *ui [:flashcard])
+                                 activate-speech!)
+           :constructor (phrase-constructor *phrase
+                                            *constructor
+                                            activate-speech!))
+         (ic/social-mood-bad {:style {:width "48px" :height "48px"}
+                              :color (color :light-green-500)})))
       (ui/card-actions
        (ui/select-field {:floating-label-text "Training"
                          :class-name "type-selector"
                          :value tp
-                         :on-change #(swap! *ui assoc :type (keyword %3))}
+                         :on-change #(set-profile-field! :trainingType %3)}
                         (ui/menu-item {:value :flashcard
                                        :primary-text "Flashcard"})
                         (ui/menu-item {:value :constructor

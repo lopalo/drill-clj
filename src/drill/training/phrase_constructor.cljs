@@ -9,7 +9,6 @@
             [cljs-react-material-ui.rum :as ui]
             [cljs-react-material-ui.icons :as ic]))
 
-
 (defc source-text [text]
   [:.source-text text])
 
@@ -48,7 +47,6 @@
        (ui/chip {:key (str idx word)
                  :on-touch-tap (partial add-word! word)}
                 word))]))
-
 
 (defcs phrase-constructor < reactive
   [state *phrase *ui activate-speech!]

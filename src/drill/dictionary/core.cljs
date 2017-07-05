@@ -7,10 +7,12 @@
                                          loader-mx
                                          tab-mx
                                          cleanup-mx]]
+            [drill.app-state :refer [languages]]
+            [drill.dictionary.filters :refer [filters]]
             [drill.utils :refer [log]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(declare dictionary table filters)
+(declare dictionary table)
 
 (defn fetch-table-data!
   ([state]
@@ -33,9 +35,23 @@
       (api-delete (str "my-dictionary/phrase/" id) {}))
     (swap! *table-data assoc-in [:list idx :isInMyDict] value)))
 
-(def initial-filters {:target-language "en"})
+(def initial-filters
+  {:target-language (first languages)
+   :grammar-section nil
+   :theme nil
+   :text ""})
 
 (def load! (wrap-load fetch-table-data!))
+
+(defn sync-filters! [state old-filters new-filters]
+  (when (not= old-filters new-filters)
+    (fetch-table-data! state)))
+
+(def dictionary-mx
+  {:will-mount
+   (fn [state]
+     (-> state ::filters (add-watch ::sync #(sync-filters! state %3 %4)))
+     state)})
 
 (defc load-more-btn [*table-data load-more!]
   [:.load-more
@@ -44,22 +60,18 @@
      :disabled (= (count (:list @*table-data)) (:total @*table-data))
      :on-touch-tap load-more!})])
 
-
-;;TODO: listen to filters' changes and handle them
 (defcs dictionary < (loader-mx)
                     cleanup-mx
                     (local [] ::table-data)
                     (local initial-filters ::filters)
                     (tab-mx load!)
+                    dictionary-mx
   [state]
   (let [*table-data (::table-data state)
         load-more! #(fetch-table-data! state true)]
     (ui/card (filters (::filters state))
              (table *table-data)
              (load-more-btn *table-data load-more!))))
-
-(defc filters [filters] [:div])
-
 
 (defn text-header-col [text]
   (ui/table-header-column {:style {:white-space "normal" :width "35%"}} text))

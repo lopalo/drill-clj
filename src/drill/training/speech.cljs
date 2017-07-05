@@ -3,7 +3,6 @@
             [drill.app-state :refer [*profile]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-
 (declare cancel!)
 
 (set! *warn-on-infer* true)

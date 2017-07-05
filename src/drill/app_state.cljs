@@ -2,7 +2,10 @@
 (ns drill.app-state
   (:require [clojure.string :as s]
             [rum.core :refer [cursor-in]]
-            [drill.utils :refer [log]]))
+            [drill.utils :refer [log]]
+            [drill.common.processes :refer [api-patch]]))
+
+(def languages ["en" "ru"])
 
 (defonce *app-state
   (atom {:route ["training"] :user nil}))
@@ -19,6 +22,10 @@
         set-route! #(reset! *route (-> js/location .-hash parse-hash))]
     (set! (. js/window -onhashchange) set-route!)
     (set-route!)))
+
+(defn set-profile-field! [field value]
+  (swap! *profile assoc field value)
+  (api-patch "profile" {:fieldName field :value value}))
 
 (comment
   (log "App state:" @*app-state)

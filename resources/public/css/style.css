@@ -22,6 +22,11 @@
 .tab {
 }
 
+.filters {
+    margin-left: 24px;
+    margin-right: 24px;
+}
+
 .training {
     text-align: center;
 }

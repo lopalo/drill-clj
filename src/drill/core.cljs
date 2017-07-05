@@ -6,7 +6,7 @@
             [rum.core :as rum :refer [defc reactive react]]
             [drill.app-state :refer [*user setup-router!]]
             [drill.app :refer [app]]
-            [drill.auth :refer [auth]]))
+            [drill.auth :refer [auth check-session!]]))
 
 (enable-console-print!)
 (setup-router!)
@@ -18,13 +18,16 @@
    {:mui-them (get-mui-theme)}
    (if (react *user) (app) (auth))))
 
-(defn mount []
+(defn mount! []
   (rum/mount (root-component)
              (. js/document (getElementById "app"))))
 
-(defn start-processes []) ;TODO: session checker
+;TODO: use Garden for generating CSS
+
+(defn start-processes! []
+  #_(check-session!))
 
 (defonce _
-  (do (mount)
-      (start-processes)))
-(defn on-js-reload [] (mount))
+  (do (mount!)
+      (start-processes!)))
+(defn on-js-reload [] (mount!))
