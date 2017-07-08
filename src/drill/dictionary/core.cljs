@@ -89,7 +89,8 @@
      (text-header-col "Source Text")
      (text-header-col "Target Text")
      (ui/table-header-column "Added By")
-     (ui/table-header-column "In My Dictionary")))
+     (ui/table-header-column {:style {:white-space "normal"}}
+                             "In My Dictionary")))
    (ui/table-body
     {:display-row-checkbox false}
     (for [[idx r] (->> @*table-data :list (map-indexed vector))]

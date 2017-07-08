@@ -15,6 +15,7 @@
     (ui/dialog
      {:title "Settings"
       :open (react *show-settings)
+      :auto-scroll-body-content true
       :actions [close-btn]
       :modal false
       :on-request-close close!}

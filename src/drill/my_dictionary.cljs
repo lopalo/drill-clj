@@ -48,10 +48,10 @@
   (ui/table-row-column {:style {:white-space "normal" :width "32%"}} text))
 
 (defn btn-header-col [text]
-  (ui/table-header-column {:style {:white-space "normal" :width "10%"}} text))
+  (ui/table-header-column {:style {:white-space "normal" :width "12%"}} text))
 
 (defn btn-row-col [btn]
-  (ui/table-row-column {:style {:white-space "normal" :width "10%"}} btn))
+  (ui/table-row-column {:style {:white-space "normal" :width "12%"}} btn))
 
 (defc table [*rows]
   (ui/table
@@ -63,7 +63,8 @@
      (text-header-col "Source Text")
      (text-header-col "Target Text")
      (btn-header-col "Reset")
-     (ui/table-header-column "Completion Time")
+     (ui/table-header-column {:style {:white-space "normal"}}
+                             "Completion Time")
      (btn-header-col "Delete")))
    (ui/table-body
     {:display-row-checkbox false}

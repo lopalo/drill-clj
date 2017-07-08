@@ -22,8 +22,6 @@
   (rum/mount (root-component)
              (. js/document (getElementById "app"))))
 
-;TODO: use Garden for generating CSS
-
 (defn start-processes! []
   #_(check-session!))
 
