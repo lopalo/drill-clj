@@ -31,17 +31,13 @@
                    :background-color (clr target-word word)}
                   word)))]))
 
-(defn count-words [words]
-  (reduce-kv #(assoc %1 %2 (count %3)) {} (group-by identity words)))
-
 (defc blocks [target-words construct add-word!]
   (let [word-count (merge-with -
-                               (count-words target-words)
-                               (count-words construct))
-        words (for [[word cnt] word-count
-                    _ (range cnt)]
-                word)
-        words (sort-by (comp s/join reverse) words)]
+                               (frequencies target-words)
+                               (frequencies construct))
+        words (->> word-count
+                   (mapcat (fn [[word c]] (repeat c word)))
+                   (sort-by (comp s/join reverse)))]
     [:.blocks
      (for [[idx word] (map-indexed vector words)]
        (ui/chip {:key (str idx word)
