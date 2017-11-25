@@ -63,7 +63,7 @@
 (def login-form [{:name :e-mail :validator v/e-mail :initial-value ""}
                  {:name :password :validator v/password :initial-value ""}])
 
-(defcs login < (f/local-form login-form ::form)
+(defcs login < (f/local-form-mx login-form ::form)
   [state]
   (let [*form (::form state)
         error (f/submit-error *form)
@@ -86,7 +86,7 @@
       (f/field *form :password password-field))
      (ui/card-actions
       (ui/raised-button {:label "Submit"
-                         :disabled (not (f/can-submit? *form))
+                         :disabled (not (f/submit-active? *form))
                          :on-touch-tap try-submit!})))))
 
 (defc register [] [:div])

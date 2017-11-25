@@ -14,6 +14,7 @@
                     :status :initial})
 
 (def statuses #{:initial :pending :submitted :submit-failure})
+
 (defn create-form [fields-spec]
   (let [collect #(into {} (map (juxt :name %) fields-spec))
         initial-values (collect :initial-value)
@@ -23,25 +24,38 @@
         (assoc :values initial-values)
         (assoc :validators validators))))
 
-(defn local-form [fields-spec key]
+(defn local-form-mx [fields-spec key]
   (local (create-form fields-spec) key))
 
 (defn valid? [*form]
-  (let [form-state @*form
-        field-names (keys (:validators form-state))]
+  (let [form @*form
+        field-names (keys (:validators form))]
     (every? nil? (for [field-name field-names]
-                   (error* form-state field-name)))))
+                   (error* form field-name)))))
 
 (defn status? [*form status]
   (assert (statuses status) statuses)
   (= status (:status @*form)))
 
-(defn errors? [*form]
+(defn values-equal? [*form values]
+  (let [form-values (:values @*form)]
+    (= (select-keys values (keys form-values)) form-values)))
+
+(def values-not-equal? (complement values-equal?))
+
+(defn values-initial? [*form]
+  (= (:values @*form) (:initial-values @*form)))
+
+(def values-not-initial? (complement values-initial?))
+
+(defn shown-errors? [*form]
   (and (:show-errors @*form)
        (not (valid? *form))))
 
-(defn can-submit? [*form]
-  (not (or (status? *form :pending) (errors? *form))))
+(defn submit-active? [*form]
+  (not (or (status? *form :pending)
+           (shown-errors? *form)
+           (values-initial? *form))))
 
 (defn submit-error [*form]
   (:submit-error @*form))
@@ -49,6 +63,11 @@
 (defn set-status! [*form status]
   (assert (statuses status) statuses)
   (swap! *form assoc :status status))
+
+(defn set-initial-values! [*form initial-values]
+  (swap! *form assoc :initial-values (select-keys
+                                      initial-values
+                                      (keys (:initial-values @*form)))))
 
 (defn fail-submit! [*form error]
   (swap! *form #(-> %
@@ -59,10 +78,10 @@
   ([*form] (show-errors! *form true))
   ([*form value] (swap! *form assoc :show-errors value)))
 
-(defn error* [form-state field-name]
-  (let [validator (get-in form-state [:validators field-name])]
+(defn error* [form field-name]
+  (let [validator (get-in form [:validators field-name])]
     (when validator
-      (validator field-name (:values form-state)))))
+      (validator field-name (:values form)))))
 
 (defn error
   [*form field-name]
