@@ -11,10 +11,10 @@
                     :text-align 'initial}])
 
 
-(def speech
-  [:.speech {:margin-left (em 1)
-             :position 'relative
-             :bottom (px -10)}])
+(def icon-button
+  [:.icon-button {:margin-left (em 1)
+                  :position 'relative
+                  :bottom (px -10)}])
 
 (def flashcard
   [:.flashcard
@@ -46,6 +46,6 @@
   [:.training
    {:text-align 'center}
    type-selector
-   speech
+   icon-button
    flashcard
    constructor])

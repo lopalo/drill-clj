@@ -15,13 +15,14 @@
                                          loader-mx
                                          tab-mx
                                          cleanup-mx]]
-            [drill.app-state :refer [*profile set-profile-field!]]
+            [drill.app-state :refer [*user *profile set-profile-field!]]
             [drill.training.flashcard :refer [flashcard]]
             [drill.training.phrase-constructor :refer [phrase-constructor]]
             [drill.training.speech
              :refer [activate! cancel!]
              :rename {activate! activate-speech!
-                      cancel! cancel-speech!}])
+                      cancel! cancel-speech!}]
+            [drill.training.patcher :refer [patcher]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn rotate [queue] (-> queue pop (conj (peek queue))))
@@ -53,7 +54,8 @@
 (def initial-ui {:speech-active? false
                  :flashcard {:flipped false}
                  :constructor {:can-complete? false
-                               :construct []}})
+                               :construct []}
+                 :patcher? false})
 
 (defcs training < (loader-mx)
                   reactive
@@ -67,6 +69,8 @@
         *working-set (::working-set state)
         *ui (::ui state)
         *constructor (cursor-in *ui [:constructor])
+        *patcher? (cursor-in *ui [:patcher?])
+        patcher? @*patcher?
         pid (first @*queue)
         *phrase (cursor-in *working-set [pid])
         tp (-> *profile react :trainingType keyword types (or :flashcard))
@@ -85,13 +89,15 @@
      (ui/card
       (ui/card-text
        (if @*phrase
-         (case tp
-           :flashcard (flashcard *phrase
-                                 (cursor-in *ui [:flashcard])
-                                 activate-speech!)
-           :constructor (phrase-constructor *phrase
-                                            *constructor
-                                            activate-speech!))
+         (if patcher?
+           (patcher *phrase)
+           (case tp
+             :flashcard (flashcard *phrase
+                                   (cursor-in *ui [:flashcard])
+                                   activate-speech!)
+             :constructor (phrase-constructor *phrase
+                                              *constructor
+                                              activate-speech!)))
          (ic/social-mood-bad {:style {:width "48px" :height "48px"}
                               :color (color :light-green-500)})))
       (ui/card-actions
@@ -109,10 +115,17 @@
                           :disabled (not can-complete?)
                           :on-touch-tap complete!})
        (ui/floating-action-button
-        {:class-name "speech"
+        {:class-name "icon-button"
          :mini true
          :on-touch-tap #(if speech-active?
                           (cancel-speech!)
                           (activate-speech! (:targetText @*phrase)))
          :secondary speech-active?}
-        (ic/av-hearing))))]))
+        (ic/av-hearing))
+       (if (:isAdmin @*user)
+         (ui/floating-action-button
+          {:class-name "icon-button"
+           :mini true
+           :on-touch-tap (partial swap! *patcher? not)
+           :secondary patcher?}
+          (ic/editor-mode-edit)))))]))

@@ -14,7 +14,7 @@
         error (if (not (blank? description)) description (:title body))]
     (if (and (>= status 200) (< status 300))
       body
-      {:error error})))
+      {:error (or error (:error-code r))})))
 
 (defn request [method url params-key params]
   (go (let [resp (<! (method (str URL "/" url) {:with-credentials? true
