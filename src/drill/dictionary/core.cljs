@@ -60,12 +60,13 @@
      :disabled (= (count (:list @*table-data)) (:total @*table-data))
      :on-touch-tap load-more!})])
 
-(defcs dictionary < (loader-mx)
-                    cleanup-mx
-                    (local [] ::table-data)
-                    (local initial-filters ::filters)
-                    (tab-mx load!)
-                    dictionary-mx
+(defcs dictionary
+  < (loader-mx)
+  < cleanup-mx
+  < (local [] ::table-data)
+  < (local initial-filters ::filters)
+  < (tab-mx load!)
+  < dictionary-mx
   [state]
   (let [*table-data (::table-data state)
         load-more! #(fetch-table-data! state true)]

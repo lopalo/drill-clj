@@ -57,13 +57,14 @@
                                :construct []}
                  :patcher? false})
 
-(defcs training < (loader-mx)
-                  reactive
-                  cleanup-mx
-                  (local #queue [] ::ring-queue)
-                  (local {} ::working-set)
-                  (local initial-ui ::ui)
-                  (tab-mx load!)
+(defcs training
+  < (loader-mx)
+  < reactive
+  < cleanup-mx
+  < (local #queue [] ::ring-queue)
+  < (local {} ::working-set)
+  < (local initial-ui ::ui)
+  < (tab-mx load!)
   [state]
   (let [*queue (::ring-queue state)
         *working-set (::working-set state)

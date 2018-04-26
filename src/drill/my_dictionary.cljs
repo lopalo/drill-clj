@@ -34,10 +34,11 @@
 
 (def load! (wrap-load #(fetch-rows! (::rows %))))
 
-(defcs my-dictionary < (loader-mx)
-                       cleanup-mx
-                       (local [] ::rows)
-                       (tab-mx load!)
+(defcs my-dictionary
+  < (loader-mx)
+  < cleanup-mx
+  < (local [] ::rows)
+  < (tab-mx load!)
   [state]
   (table (::rows state)))
 

@@ -2,6 +2,7 @@
 (ns drill.training.patcher
   (:require [clojure.string :as s]
             [clojure.core.async :refer [<!]]
+            [sablono.core :refer [html]]
             [rum.core :as rum :refer [defc
                                       defcs
                                       reactive
@@ -40,14 +41,15 @@
                          msg (if (:error r) "Failure" "Saved")]
                      (reset! *message msg)))]
     (ui/paper {:z-depth 5
-               :class-name "flashcard"}
-              (ui/text-field {:type "text"
-                              :id "text"
-                              :full-width true
-                              :multi-line true
-                              :rows-max 3
-                              :value (field p)
-                              :on-change #(swap! *phrase assoc field %2)})
+               :class-name "flashcard"
+               :id (name field)}
+              (html
+               [:textarea.patcher-text
+                {:id "text"
+                 :rows 3
+                 :value (field p)
+                 :on-change #(swap! *phrase assoc field
+                                    (.. % -target -value))}])
               (buttons *flipped save!)
               (ui/snackbar {:message @*message
                             :open (not (s/blank? @*message))

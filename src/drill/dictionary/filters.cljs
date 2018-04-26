@@ -18,10 +18,11 @@
            (reset! (::themes state) (vals themes))))
      state)})
 
-(defcs filters < reactive
-                 (local [] ::grammar-sections)
-                 (local [] ::themes)
-                 filters-mx
+(defcs filters
+  < reactive
+  < (local [] ::grammar-sections)
+  < (local [] ::themes)
+  < filters-mx
   [state *filters]
   (let [f (react *filters)
         grammar-sections @(::grammar-sections state)
